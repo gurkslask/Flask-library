@@ -30,7 +30,13 @@
 
 {%block content %}
 
-{{ wtf.quick_form(ProjectsFormF)}}
+<ul>
+    {% for i in project %}
+    <li>
+        {{ i }} {{project[i]}}
+    </li>
+    {% endfor %}
+</ul>
 
 
 {%endblock%}
