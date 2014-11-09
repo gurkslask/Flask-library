@@ -1,49 +1,14 @@
-from flask import Flask, render_template, redirect, url_for
-from flask.ext.bootstrap import Bootstrap
-from flask.ext.wtf import Form
-from wtforms import SubmitField, RadioField, TextField
-from wtforms.validators import InputRequired, ValidationError
-from flask.ext.script import Manager
+from flask import render_template, redirect, url_for, session
+from . import main
+from .forms import (ProjectsForm, ConfirmForm, validate_CheckOut,
+                    validate_CheckIn, InitForm)
+from ...engine import LibraryFunctions
 import os
-from LibraryFunctions import Libraryfunctions
+
+Lf = LibraryFunctions()
 
 
-app = Flask(__name__)
-manager = Manager(app)
-app.config['SECRET_KEY'] = 'nidnsöf&%dsad&%7(/(212>><'
-bootstrap = Bootstrap(app)
-Lf = Libraryfunctions()
-
-
-class ProjectsForm(Form):
-    """docstring for ProjectsForm"""
-    #Make the radiofield
-    ChooseProject = RadioField('Projects',
-                               validators=[InputRequired(), ]
-                               )
-
-    #SubmitField
-    CheckOutSubmit = SubmitField('Check out')
-    CheckInSubmit = SubmitField('Check in')
-
-
-class ConfirmForm(Form):
-    """docstring for ConfirmForm"""
-    ConfirmSubmit = SubmitField('Yes!')
-    DeclineSubmit = SubmitField('No')
-
-
-def validate_CheckOut(form, field):
-    if Lf.ReadProjectDict(field.data)['CheckedOut']:
-        raise ValidationError('Already checked out')
-
-
-def validate_CheckIn(form, field):
-    if not Lf.ReadProjectDict(field.data)['CheckedOut']:
-        raise ValidationError('Already checked in')
-
-
-@app.route('/', methods=['GET', 'POST'])
+@main.route('/', methods=['GET', 'POST'])
 def index():
     ProjectsFormF = ProjectsForm()
     """Big mothafucka list concentation
@@ -72,7 +37,7 @@ def index():
     )
 
 
-@app.route('/info/<project>')
+@main.route('/info/<project>')
 def ProjectInfo(project):
     return render_template(
         'info.html',
@@ -80,15 +45,7 @@ def ProjectInfo(project):
         )
 
 
-class InitForm(Form):
-    """docstring for initform"""
-    InitProjectName = TextField('Name of project',
-                                validators=[InputRequired()]
-                                )
-    submit = SubmitField('Initiate!')
-
-
-@app.route('/init', methods=['GET', 'POST'])
+@main.route('/init', methods=['GET', 'POST'])
 def init():
     InitFormF = InitForm()
     if InitFormF.validate_on_submit():
@@ -99,7 +56,7 @@ def init():
                 #If it exists, present the user to a Confirm form
                 return render_template(
                     'empty.html',
-                    text = 'Cannot create project, it already exists!')
+                    text='Cannot create project, it already exists!')
         except Exception:
             Lf.InitProject(InitFormF.InitProjectName.data)
             return redirect(url_for('index'))
@@ -108,7 +65,3 @@ def init():
         'init.html',
         InitFormF=InitFormF
         )
-
-if __name__ == '__main__':
-    app.run(debug=True)
-    #app.run(debug=False)
