@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, session
 from . import main
 from .forms import (ProjectsForm, ConfirmForm, validate_CheckOut,
                     validate_CheckIn, InitForm)
-from ...engine import LibraryFunctions
+from .LibraryFunctions import LibraryFunctions
 import os
 
 Lf = LibraryFunctions()
