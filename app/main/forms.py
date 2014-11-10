@@ -21,19 +21,16 @@ class ConfirmForm(Form):
     DeclineSubmit = SubmitField('No')
 
 
-def validate_CheckOut(form, field):
-    if Lf.ReadProjectDict(field.data)['CheckedOut']:
-        raise ValidationError('Already checked out')
-
-
-def validate_CheckIn(form, field):
-    if not Lf.ReadProjectDict(field.data)['CheckedOut']:
-        raise ValidationError('Already checked in')
-
-
 class InitForm(Form):
     """docstring for initform"""
     InitProjectName = TextField('Name of project',
                                 validators=[InputRequired()]
                                 )
     submit = SubmitField('Initiate!')
+
+
+class dlRdy(Form):
+    """docstring for dlRdy"""
+    dlRdySubmit = SubmitField("""I've downloaded the project
+    and can check the project out"""
+                              )

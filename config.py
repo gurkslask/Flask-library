@@ -3,7 +3,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    SecretKey = os.environ.get('SecretKey') or 'NKDBDKFBAD/&%¤56563hblfds'
+    SECRET_KEY = os.environ.get('SecretKey') or 'NKDBDKFBAD/&%¤56563hblfds'
 
     @staticmethod
     def init_app(app):
@@ -11,11 +11,11 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    Debug = True
+    DEBUG = True
 
 
 class TestingConfig(Config):
-    Testing = True
+    TESTING = True
 
 
 class ProductionConfig(Config):

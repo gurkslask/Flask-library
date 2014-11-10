@@ -12,7 +12,6 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     bootstrap.init_app(app)
-    print(os.getcwd())
 
     from app.main import main as mainBlueprint
     app.register_blueprint(mainBlueprint)

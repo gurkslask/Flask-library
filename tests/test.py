@@ -1,7 +1,7 @@
 import unittest
-import os
 import time
-from LibraryFunctions import Libraryfunctions
+import os
+from app.main.LibraryFunctions import Libraryfunctions
 
 
 class Test(unittest.TestCase):
@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
 
     def test_Delete(self):
         self.Lf.DeleteProject(self.project)
-        print(os.listdir(self.projects_folder))
+        time.sleep(1)
         self.assertFalse(self.project in os.listdir(self.projects_folder))
 
 
