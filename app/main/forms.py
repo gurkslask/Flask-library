@@ -1,5 +1,5 @@
-from wtforms import SubmitField, RadioField, TextField
-from wtforms.validators import InputRequired, ValidationError
+from wtforms import SubmitField, RadioField, TextField, FileField
+from wtforms.validators import InputRequired
 from flask.ext.wtf import Form
 
 
@@ -34,3 +34,9 @@ class dlRdy(Form):
     dlRdySubmit = SubmitField("""I've downloaded the project
     and can check the project out"""
                               )
+
+
+class UploadZip(Form):
+    """This is the form for uploading files"""
+    FileFieldF = FileField()
+    UploadSubmit = SubmitField('Upload Here!')

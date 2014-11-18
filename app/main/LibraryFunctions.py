@@ -1,16 +1,19 @@
 import json
 import os
 import zipfile
+import shutil
 
 
 class Libraryfunctions(object):
     """docstring for Libraryfunctions"""
     def __init__(self):
-        super(Libraryfunctions, self).__init__()
         self.ProjectFolder = os.path.join('app/Projects')
         self.StaticFolder = os.path.join('app/static')
+        self.UploadFolder = os.path.join('app/Uploads')
         self.ProjectFolderPath = os.path.join(os.getcwd(), self.ProjectFolder)
         self.StaticFolderPath = os.path.join(os.getcwd(), self.StaticFolder)
+        self.UploadFolderPath = os.path.join(os.getcwd(), self.UploadFolder)
+        self.WorkingFolderPath = os.path.abspath('.')
 
     def CheckOut(self, project):
         #Is used for checking out projects
@@ -64,11 +67,23 @@ class Libraryfunctions(object):
                     zipf.write(os.path.join(base, file))
 
     def UnZipProject(self, project):
-        pass
+        """
+        Declare the file thats going to be unzipped,
+        chdir to the path where the projects are
+        and then extract the file and then
+        chdir back.
+        """
+        os.chdir(self.UploadFolderPath)
+        zf = zipfile.ZipFile('{}.zip'.format(
+            project
+            ))
+        #os.chdir(self.ProjectFolderPath)
+        zf.extractall(self.ProjectFolderPath)
+        os.chdir(self.WorkingFolderPath)
 
     def DeleteProject(self, project):
         os.popen('rm {} -r'.format(os.path.join(
-            self.ProjectFolderPath, project)))
+            self.StaticFolderPath, project)))
 
 if __name__ == '__main__':
     #Do nothing when this is imported

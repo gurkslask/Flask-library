@@ -11,6 +11,7 @@ class Test(unittest.TestCase):
         self.project = 'test_Projekt'
         self.project3 = 'test_Projekt3'
         self.projects_folder = 'test_Projects'
+        self.uploads_folder = os.path.join(self.projects_folder, 'test_upload')
         if self.projects_folder not in os.listdir():
             os.mkdir(self.projects_folder)
         os.chdir(self.projects_folder)
@@ -21,6 +22,7 @@ class Test(unittest.TestCase):
         self.Lf.ProjectFolderPath = os.path.join(
             os.getcwd(), self.projects_folder)
         self.Lf.StaticFolderPath = self.Lf.ProjectFolderPath
+        self.Lf.UploadFolderPath = self.uploads_folder
         self.Lf.InitProject(self.project)
 
     def test_init(self):
@@ -49,7 +51,7 @@ class Test(unittest.TestCase):
         self.assertEqual(j['CheckedOut'], False)
 
     def test_zip(self):
-        self.Lf.ZipProject(self.project)
+        self.Lf.ZipPdearoject(self.project)
         self.assertGreater(
             os.path.getsize(
                 '{}.zip'.format(
@@ -57,11 +59,16 @@ class Test(unittest.TestCase):
 
     def test_unzip(self):
         self.Lf.UnZipProject(self.project)
+        self.assertEqual(6, os.listdir(self.uploads_folder))
 
     def test_Delete(self):
         self.Lf.DeleteProject(self.project)
         time.sleep(1)
         self.assertFalse(self.project in os.listdir(self.projects_folder))
+
+    def test_CheckInZip(self):
+        #self.Lf.UnZipProject(self.project)
+        pass
 
 
 if __name__ == '__main__':

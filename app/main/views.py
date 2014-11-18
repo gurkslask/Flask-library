@@ -1,17 +1,22 @@
-from flask import render_template, redirect, url_for, session
+from flask import render_template, redirect, url_for, session, request
 from . import main
-from .forms import (ProjectsForm, InitForm, dlRdy)
+from .forms import (ProjectsForm, InitForm, dlRdy, UploadZip)
 from .LibraryFunctions import Libraryfunctions
+from wtforms.validators import ValidationError
+from flask.ext import uploads
 import os
+from werkzeug import secure_filename, FileStorage
 
 
 Lf = Libraryfunctions()
+ZipUpload = uploads.UploadSet('zipfiles')
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'app/uploads/')
+ALLOWED_EXTENSIONS = set(['zip'])
 
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
     ProjectsFormF = ProjectsForm()
-    dlRdyF = dlRdy()
     """Big mothafucka list concentation
     for populating the radio buttons in the form
     """
@@ -24,30 +29,58 @@ def index():
         #If there is no projects
         return render_template('empty.html', text='No projects')
     if ProjectsFormF.validate_on_submit():
+        session['Project'] = ProjectsFormF.ChooseProject.data
         #If any submit buttons are clicked
-        session['Project'] = session['Project']
         if ProjectsFormF.CheckInSubmit.data:
             #Check which submit button was clicked
             validate_CheckIn(ProjectsFormF, ProjectsFormF.ChooseProject)
-            Lf.ZipProject(session['Project'])
+            print('Checka in {}'.format(session['Project']))
             Lf.CheckIn(session['Project'])
+            return redirect(url_for('main.index'))
         elif ProjectsFormF.CheckOutSubmit.data:
             #Check which submit button was clicked
             validate_CheckOut(ProjectsFormF, ProjectsFormF.ChooseProject)
             Lf.ZipProject(session['Project'])
-            print(session['Project'])
-            return render_template(
-                'dlProject.html',
-                project=session['Project'],
-                dlRdyF=dlRdyF
-                )
+            #Send to download page
+            download()
+            return redirect(url_for('main.download'))
+    return render_template('projects.html',
+                           ProjectsFormF=ProjectsFormF,
+                           projects=session['Project']
+                           )
+
+
+@main.route('/download', methods=['GET', 'POST'])
+def download():
+    dlRdyF = dlRdy()
     if dlRdyF.validate_on_submit():
-        Lf.CheckOut(session['Project'])
-        return redirect(url_for('main.index'))
+        if dlRdyF.dlRdySubmit.data:
+            #When the download is ready and the project is ready for checkout
+            Lf.CheckOut(session['Project'])
+            Lf.DeleteProject(session['Project'] + '.zip')
+            session['Project'] = None
+            return redirect(url_for('main.index'))
     return render_template(
-        'projects.html',
-        ProjectsFormF=ProjectsFormF
-    )
+        'dlProject.html', project=session['Project'], dlRdyF=dlRdyF)
+
+
+def validate_filename(filename):
+    if '.' not in filename and filename.rsplit('.', 1)[1] not in ALLOWED_EXTENSIONS:
+        raise ValidationError('Not a zip file')
+
+
+@main.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+        file = request.files['file']
+        if file:
+            filename = secure_filename(file.filename)
+            validate_filename(filename)
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+            return 'Uploaded!'
+    return render_template(
+        'ulProject_html.html'
+        )
 
 
 @main.route('/test')
@@ -84,6 +117,7 @@ def init():
         InitFormF=InitFormF
         )
 
+
 def validate_CheckOut(form, field):
     if Lf.ReadProjectDict(field.data)['CheckedOut']:
         raise ValidationError('Already checked out')
@@ -92,4 +126,3 @@ def validate_CheckOut(form, field):
 def validate_CheckIn(form, field):
     if not Lf.ReadProjectDict(field.data)['CheckedOut']:
         raise ValidationError('Already checked in')
-
